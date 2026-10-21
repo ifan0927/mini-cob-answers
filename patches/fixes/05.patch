@@ -1,0 +1,33 @@
+diff --git a/src/main/java/com/minicob/cob/LoanCobItemProcessor.java b/src/main/java/com/minicob/cob/LoanCobItemProcessor.java
+index 1c4e144..82e2bab 100644
+--- a/src/main/java/com/minicob/cob/LoanCobItemProcessor.java
++++ b/src/main/java/com/minicob/cob/LoanCobItemProcessor.java
+@@ -4,6 +4,7 @@ import com.minicob.cob.step.CobStepContext;
+ import com.minicob.cob.step.LoanCobBusinessStep;
+ import com.minicob.context.BusinessDateContext;
+ import com.minicob.loan.Loan;
++import com.minicob.loan.LoanNotFoundException;
+ import java.util.List;
+ import org.springframework.batch.item.ItemProcessor;
+ import org.springframework.stereotype.Component;
+@@ -14,14 +15,18 @@ import org.springframework.stereotype.Component;
+ @Component
+ public class LoanCobItemProcessor implements ItemProcessor<Loan, ProcessedLoan> {
+ 
++    private final CobLoanRepository repository;
+     private final List<LoanCobBusinessStep> steps;
+ 
+-    public LoanCobItemProcessor(List<LoanCobBusinessStep> steps) {
++    public LoanCobItemProcessor(CobLoanRepository repository, List<LoanCobBusinessStep> steps) {
++        this.repository = repository;
+         this.steps = steps;
+     }
+ 
+     @Override
+-    public ProcessedLoan process(Loan loan) {
++    public ProcessedLoan process(Loan item) {
++        // On a retry the item is the detached instance from the rolled-back attempt; work on the current row.
++        Loan loan = repository.findForCob(item.getId()).orElseThrow(() -> new LoanNotFoundException(item.getId()));
+         CobStepContext context = new CobStepContext(BusinessDateContext.getCobDate());
+         for (LoanCobBusinessStep step : steps) {
+             step.execute(loan, context);

@@ -1,0 +1,26 @@
+diff --git a/src/main/java/com/minicob/repayment/RepaymentService.java b/src/main/java/com/minicob/repayment/RepaymentService.java
+index 40defa4..14be58a 100644
+--- a/src/main/java/com/minicob/repayment/RepaymentService.java
++++ b/src/main/java/com/minicob/repayment/RepaymentService.java
+@@ -34,11 +34,7 @@ public class RepaymentService {
+     /**
+      * Applies a repayment exactly once per idempotency key. A retried request with the same key and
+      * payload gets the original result back.
+-     * <p>
+-     * The transaction starts here. {@code applyRepayment} is called on {@code this}, which bypasses the
+-     * transactional proxy, so the boundary has to be on this public entry point.
+      */
+-    @Transactional
+     public RepaymentResult repay(Long loanId, String idempotencyKey, BigDecimal amount) {
+         Optional<Repayment> previous = repaymentRepository.findByIdempotencyKey(idempotencyKey);
+         if (previous.isPresent()) {
+@@ -53,7 +49,8 @@ public class RepaymentService {
+         return applyRepayment(loanId, idempotencyKey, amount);
+     }
+ 
+-    RepaymentResult applyRepayment(Long loanId, String idempotencyKey, BigDecimal amount) {
++    @Transactional
++    public RepaymentResult applyRepayment(Long loanId, String idempotencyKey, BigDecimal amount) {
+         Loan loan = loanRepository.findWithInstallmentsById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+         LocalDate businessDate = BusinessDateContext.getBusinessDate();
+ 

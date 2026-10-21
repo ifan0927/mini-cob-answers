@@ -1,0 +1,14 @@
+diff --git a/src/main/java/com/minicob/loan/LoanService.java b/src/main/java/com/minicob/loan/LoanService.java
+index 176f093..5139100 100644
+--- a/src/main/java/com/minicob/loan/LoanService.java
++++ b/src/main/java/com/minicob/loan/LoanService.java
+@@ -24,7 +24,8 @@ public class LoanService {
+                                     BigDecimal annualInterestRate, int termMonths) {
+     }
+ 
+-    @Transactional
++    // ExposureLimitExceededException is checked, and Spring rolls back only on unchecked exceptions by default.
++    @Transactional(rollbackFor = ExposureLimitExceededException.class)
+     public Loan createLoan(CreateLoanCommand command) throws ExposureLimitExceededException {
+         Loan loan = Loan.disburse(command.customerId(), command.currency(), command.principal(),
+                 command.annualInterestRate(), command.termMonths(), BusinessDateContext.getBusinessDate());

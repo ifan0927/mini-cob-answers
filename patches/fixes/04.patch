@@ -1,0 +1,14 @@
+diff --git a/src/main/java/com/minicob/cob/CobJobConfiguration.java b/src/main/java/com/minicob/cob/CobJobConfiguration.java
+index edf77ce..7febe4c 100644
+--- a/src/main/java/com/minicob/cob/CobJobConfiguration.java
++++ b/src/main/java/com/minicob/cob/CobJobConfiguration.java
+@@ -87,7 +87,9 @@ public class CobJobConfiguration {
+                 .build();
+     }
+ 
++    // One reader per partition: the reader keeps a cursor and partitions run concurrently.
+     @Bean
++    @StepScope
+     public LoanItemReader cobLoanReader(CobLoanRepository repository) {
+         return new LoanItemReader(repository);
+     }

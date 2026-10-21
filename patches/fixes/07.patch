@@ -1,0 +1,17 @@
+diff --git a/src/main/java/com/minicob/cob/CobLoanRepository.java b/src/main/java/com/minicob/cob/CobLoanRepository.java
+index 928a952..c68245d 100644
+--- a/src/main/java/com/minicob/cob/CobLoanRepository.java
++++ b/src/main/java/com/minicob/cob/CobLoanRepository.java
+@@ -12,10 +12,12 @@ import org.springframework.data.repository.query.Param;
+ /** Queries used by the COB job. */
+ public interface CobLoanRepository extends Repository<Loan, Long> {
+ 
++    // Loans already closed for cobDate are left out, which makes re-running a date safe.
+     @Query("""
+             select l.id from Loan l
+             where l.status <> com.minicob.loan.LoanStatus.CLOSED
+               and l.disbursementDate <= :cobDate
++              and (l.lastClosedBusinessDate is null or l.lastClosedBusinessDate < :cobDate)
+             order by l.id
+             """)
+     List<Long> findIdsToClose(@Param("cobDate") LocalDate cobDate);

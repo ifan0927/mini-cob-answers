@@ -1,0 +1,30 @@
+diff --git a/src/main/java/com/minicob/cob/CobLockingStepListener.java b/src/main/java/com/minicob/cob/CobLockingStepListener.java
+index 01e935b..354867b 100644
+--- a/src/main/java/com/minicob/cob/CobLockingStepListener.java
++++ b/src/main/java/com/minicob/cob/CobLockingStepListener.java
+@@ -4,7 +4,6 @@ import java.time.LocalDate;
+ import java.util.List;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+-import org.springframework.batch.core.BatchStatus;
+ import org.springframework.batch.core.ExitStatus;
+ import org.springframework.batch.core.StepExecution;
+ import org.springframework.batch.core.StepExecutionListener;
+@@ -34,12 +33,11 @@ public class CobLockingStepListener implements StepExecutionListener {
+ 
+     @Override
+     public ExitStatus afterStep(StepExecution stepExecution) {
+-        if (stepExecution.getStatus() == BatchStatus.COMPLETED) {
+-            List<Long> loanIds = LoanCobPartitioner.loanIdsOf(stepExecution.getExecutionContext());
+-            int released = lockService.releaseErrorFree(loanIds);
+-            log.debug("{} finished with {}; released {} remaining locks", stepExecution.getStepName(),
+-                    stepExecution.getStatus(), released);
+-        }
++        // Runs whatever the outcome: a failed step must not leave the rest of its partition locked.
++        List<Long> loanIds = LoanCobPartitioner.loanIdsOf(stepExecution.getExecutionContext());
++        int released = lockService.releaseErrorFree(loanIds);
++        log.debug("{} finished with {}; released {} remaining locks", stepExecution.getStepName(),
++                stepExecution.getStatus(), released);
+         return null;
+     }
+ }

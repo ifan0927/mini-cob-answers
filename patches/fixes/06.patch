@@ -1,0 +1,12 @@
+diff --git a/src/main/java/com/minicob/loan/LoanRepository.java b/src/main/java/com/minicob/loan/LoanRepository.java
+index ea60cd7..50b4a16 100644
+--- a/src/main/java/com/minicob/loan/LoanRepository.java
++++ b/src/main/java/com/minicob/loan/LoanRepository.java
+@@ -23,5 +23,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
+ 
+     List<Loan> findByCustomerIdOrderById(String customerId);
+ 
++    // The overdue report reads every loan's schedule: fetch it together with the loans.
++    @EntityGraph(attributePaths = "installments")
+     List<Loan> findByStatusOrderById(LoanStatus status);
+ }

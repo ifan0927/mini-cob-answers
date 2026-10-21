@@ -1,0 +1,12 @@
+# exercise	test class	regex the learner failure message must match (checks the test fails for its own bug)
+01	Ex01RejectedRepaymentTest	repayment history after the API answered 422[\s\S]*Expecting empty but was: \[\{"repaymentId"
+02	Ex02DeclinedLoanApplicationTest	loans on the books of customer C-EX02[\s\S]*not expected:\s*\[2000000
+03	Ex03CobFailureDiagnosticsTest	account lock of the loan COB could not process[\s\S]*Optional to contain a value but it was empty
+04	Ex04LargeCobRunTest	loans not closed exactly once for 2026-04-16 \(\d+ of 400\)
+05	Ex05TellerDuringCobTest	last closed business date of the loan[\s\S]*but was: null
+06	Ex06OverdueReportTest	SQL statements executed by one overdue report call[\s\S]*Expecting actual:\s*2\dL
+07	Ex07CobRerunTest	interest accrued for one day on loan \d+[\s\S]*but was: 40
+08	Ex08AbortedCobTest	repayments on healthy loans[\s\S]*HTTP 409
+09	Ex09ConsecutiveBusinessDaysTest	last closed date after night two[\s\S]*expected: 2026-04-16[\s\S]*but was: 2026-04-15
+10	Ex10LoanApplicationBurstTest	loan applications that failed out of 8[\s\S]*(CannotCreateTransactionException|Connection is not available)
+11	Ex11InterestReconciliationTest	one day of interest on [\d,.]+ USD[\s\S]*expected: (20\.55|136\.99)[\s\S]*but was: (20\.50|137\.00)

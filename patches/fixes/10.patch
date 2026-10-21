@@ -1,0 +1,24 @@
+diff --git a/src/main/java/com/minicob/loan/AccountNumberGenerator.java b/src/main/java/com/minicob/loan/AccountNumberGenerator.java
+index 13f4e57..9bad550 100644
+--- a/src/main/java/com/minicob/loan/AccountNumberGenerator.java
++++ b/src/main/java/com/minicob/loan/AccountNumberGenerator.java
+@@ -1,7 +1,6 @@
+ package com.minicob.loan;
+ 
+ import org.springframework.stereotype.Service;
+-import org.springframework.transaction.annotation.Propagation;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+ /**
+@@ -18,9 +17,8 @@ public class AccountNumberGenerator {
+         this.repository = repository;
+     }
+ 
+-    // Allocate in a short transaction of its own so the counter row lock is released
+-    // immediately instead of being held until the whole loan booking commits.
+-    @Transactional(propagation = Propagation.REQUIRES_NEW)
++    // Joins the caller's transaction. REQUIRES_NEW here would hold two pooled connections per booking.
++    @Transactional
+     public String nextLoanAccountNumber() {
+         NumberSequence sequence = repository.findForUpdate(LOAN_ACCOUNT_SEQUENCE)
+                 .orElseThrow(() -> new IllegalStateException("Sequence " + LOAN_ACCOUNT_SEQUENCE + " is missing"));

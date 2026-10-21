@@ -1,0 +1,22 @@
+diff --git a/src/main/java/com/minicob/cob/LockErrorRecorder.java b/src/main/java/com/minicob/cob/LockErrorRecorder.java
+index a6a1836..257e302 100644
+--- a/src/main/java/com/minicob/cob/LockErrorRecorder.java
++++ b/src/main/java/com/minicob/cob/LockErrorRecorder.java
+@@ -5,6 +5,7 @@ import java.io.StringWriter;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.stereotype.Service;
++import org.springframework.transaction.annotation.Propagation;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+ /**
+@@ -21,7 +22,8 @@ public class LockErrorRecorder {
+         this.repository = repository;
+     }
+ 
+-    @Transactional
++    // The caller's chunk transaction is about to roll back; the error has to be committed on its own.
++    @Transactional(propagation = Propagation.REQUIRES_NEW)
+     public void recordError(Long loanId, String message, Throwable error) {
+         repository.findById(loanId).ifPresentOrElse(
+                 lock -> lock.recordError(message, stacktraceOf(error)),

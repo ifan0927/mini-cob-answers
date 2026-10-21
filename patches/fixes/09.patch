@@ -1,0 +1,48 @@
+diff --git a/src/main/java/com/minicob/context/BusinessDateContext.java b/src/main/java/com/minicob/context/BusinessDateContext.java
+index bd2724c..1cc2210 100644
+--- a/src/main/java/com/minicob/context/BusinessDateContext.java
++++ b/src/main/java/com/minicob/context/BusinessDateContext.java
+@@ -5,11 +5,11 @@ import java.time.LocalDate;
+ /**
+  * Thread-bound business dates, in the spirit of Fineract's {@code ThreadLocalContextUtil}.
+  * Whoever starts a unit of work (an HTTP request, a COB run) is responsible for setting and
+- * clearing it.
++ * clearing it. Pooled COB worker threads receive it through {@link CobTaskDecorator}.
+  */
+ public final class BusinessDateContext {
+ 
+-    private static final ThreadLocal<BusinessDates> CURRENT = new InheritableThreadLocal<>();
++    private static final ThreadLocal<BusinessDates> CURRENT = new ThreadLocal<>();
+ 
+     private BusinessDateContext() {
+     }
+diff --git a/src/main/java/com/minicob/context/CobTaskDecorator.java b/src/main/java/com/minicob/context/CobTaskDecorator.java
+index 22458f4..df42a02 100644
+--- a/src/main/java/com/minicob/context/CobTaskDecorator.java
++++ b/src/main/java/com/minicob/context/CobTaskDecorator.java
+@@ -5,19 +5,24 @@ import org.slf4j.MDC;
+ import org.springframework.core.task.TaskDecorator;
+ 
+ /**
+- * Carries the submitting thread's logging context over to pooled COB worker threads.
++ * Carries the submitting thread's context over to pooled COB worker threads.
+  */
+ public class CobTaskDecorator implements TaskDecorator {
+ 
+     @Override
+     public Runnable decorate(Runnable runnable) {
++        // Captured on the submitting thread. A pooled worker thread may still carry a previous run's state.
++        BusinessDates dates = BusinessDateContext.getOrNull();
+         Map<String, String> mdc = MDC.getCopyOfContextMap();
+         return () -> {
++            BusinessDates previousDates = BusinessDateContext.getOrNull();
+             Map<String, String> previousMdc = MDC.getCopyOfContextMap();
++            BusinessDateContext.restore(dates);
+             setMdc(mdc);
+             try {
+                 runnable.run();
+             } finally {
++                BusinessDateContext.restore(previousDates);
+                 setMdc(previousMdc);
+             }
+         };
